@@ -81,6 +81,7 @@ def __printStocksCandles(stocks_list, number_of_days):
         stock.printCandlesList(number_of_days)
 
 
+
 def __checkThreeCandlesStrategy(stocks_list, number_of_days):
     """A function that checks if the candles of a specific stock are valid candles
     under the Three Candles Strategy and if it is a valid one, puts it into the 
