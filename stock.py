@@ -71,7 +71,6 @@ class Stock:
         new_candles_list = []
         
         for day_num in range(self.__number_of_candles):
-            print(end_date, start_date, day_num)
             new_candle = self.__createCandle(end_date, start_date, day_num + 1)
 
             new_candles_list.append(new_candle)

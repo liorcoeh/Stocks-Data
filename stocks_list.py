@@ -28,7 +28,9 @@ def upgradeTheStocksListFileBasedOnPrice(min_price=0, max_price=100):
     """This function will update the stocks_list.txt file to have stocks
     in it based on prices of the stocks.
     """
-    print("Running Program\n")
+    print("UPDATING STOCKS ACCORDING TO PRICE")
+    print("----------------------------------\n")
+
     current_list_of_stocks = getTheStocksListFromFile()
 
     updated_list_of_stocks = []
@@ -47,22 +49,61 @@ def upgradeTheStocksListFileBasedOnPrice(min_price=0, max_price=100):
     # If the close price is between these two values, the stock is appended
     # into the updated list
     for stock in current_list_of_stocks:
-        print("HERE1")
-        last_day_candle_data = yfinance.download(stock, start_date, end_date, progress=False)
-        print("HERE2")
-        close_price = float(last_day_candle_data['Close'])
-        close_price = round(close_price, 2)
-        if (min_price < close_price < max_price):
-            print(stock, close_price)
-            updated_list_of_stocks.append(stock)
+        if (stock == ""):
+            continue
+
+        try:
+            last_day_candle_data = yfinance.download(stock, start_date, end_date, progress=False)
+
+            close_price = float(last_day_candle_data['Close'])
+            close_price = round(close_price, 2)
+            if (min_price < close_price < max_price):
+                updated_list_of_stocks.append(stock)
+        
+        except:
+            print("Problematic Stock: ", stock)
 
     __replaceStocksInStocksListFile(updated_list_of_stocks)
 
-    print("Finished updating the stock list in the file\n")
+    print("\nFinished updating the stock list in the file\n\n")
 
 ###########################################################################
 #      ADDING DIFFERENT LISTS TO THE stocks_list.txt FILE FUNCTIONS       #
 ###########################################################################
+
+# LEVERAGED LONG STOCKS
+#######################
+def addingLeveragedLongStocksToTheFile():
+    """A function that adds the levereged long stocks into the
+    stocks_list.txt file
+    """
+    print()
+    print("ADDING LEVERAGED LONG STOCKS TO THE TXT FILE")
+    print("--------------------------------------------\n")
+
+    new_stocks_list = [
+        "QQQ",
+        "QLD",
+        "TQQQ",
+        "SPY",
+        "SSO",
+        "UPRO",
+        "DIA",
+        "DDM",
+        "UDOW",
+        "IWM",
+        "UWM",
+        "URTY",
+        "SOXX",
+        "SOXL",
+    ]
+
+    print("Adding the stocks...\n")
+
+    __addStocksToFile(new_stocks_list)
+
+    print("Stocks added - You can open the file\n\n")
+
 
 # S&P 500
 ##########
@@ -70,15 +111,17 @@ def addingSandPStocksToTheFile():
     """A function that adds (or updates) the S&P 500 stocks list into the
     stocks_list.txt file
     """
-    print("Running program")
+    print()
+    print("ADDING S&P500 STOCKS TO THE TXT FILE")
+    print("------------------------------------\n")
 
     new_stocks_list = __getSandPStockListFromWeb()
 
-    print("Adding S&P 500 stocks into the file")
+    print("Adding the stocks...\n")
 
     __addStocksToFile(new_stocks_list)
 
-    print("Stocks added - You can look at the file")
+    print("Stocks added - You can open the file\n\n")
 
 # NASDAQ 100
 #############

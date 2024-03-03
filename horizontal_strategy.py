@@ -28,8 +28,9 @@ from datetime import datetime
 
 
 def horizontalStrategyFunc():
-    print("Hello and welcome to the HORIZONATL STRATEGY")
-    print("--------------------------------------------\n")
+    print("\n")
+    print("HORIZONATL STRATEGY")
+    print("-------------------\n")
 
     number_of_days = __getUserNumberOfDays()
     if (number_of_days == -1):
@@ -52,13 +53,8 @@ def horizontalStrategyFunc():
     print("The program is finished, you can open the horizontal_strategy_valid_stocks.txt file\n\n")
 
 
-    ##########################################################################################
-    #########                            SELF FUNCTIONS                              #########
-    ##########################################################################################
-
-
 ##########################################################################################
-#########                          SUPPORT FUNCTIONS                             #########
+#########                          SELF FUNCTIONS                             #########
 ##########################################################################################
 
 def __getUserNumberOfDays():
@@ -67,7 +63,7 @@ def __getUserNumberOfDays():
     If the user doesn't give a number it will be set to 7
     """
 
-    print("Please enter the number of days to run the strategy on (must be 2 or more)")
+    print("Please enter the number of days to run the strategy on (must be 3 or more)")
     print("If you will just press Enter it will be 7 days")
 
     number_of_days = input()
@@ -76,8 +72,8 @@ def __getUserNumberOfDays():
         number_of_days = 7
     else:
         number_of_days = int(number_of_days)
-        if (number_of_days < 2):
-            print("\nThe number of days must be 2 or more\n")
+        if (number_of_days < 3):
+            print("\nThe number of days must be 3 or more\n")
             return (-1)
 
     print("\n")
@@ -124,7 +120,7 @@ def __createStocks():
 
     # Create Stock objects and append them to one list
     for i in range(list_size):
-        if stocks_names_list[i] is "":
+        if (stocks_names_list[i] == ""):
             continue
         new_stock = Stock(stocks_names_list[i])
         stocks_list.append(new_stock)
@@ -138,10 +134,15 @@ def __createAllCandles(stocks_list, end_date, number_of_days):
     The function will create the right candles in a stock and then move on
     to the next stock to do the same for that.
     """
+    amount_of_stocks = len(stocks_list)
+    index = 0
 
     # Creates the candles for each stock inside the given list
     for stock in stocks_list:
-        print("starting {stock}".format(stock=stock.getSymbol()))
+        index = index + 1
+        if (index % 10 == 0):
+            print(f"Stock number {index} out of {amount_of_stocks} stocks...")
+        # print("starting {stock}".format(stock=stock.getSymbol()))
         stock.createCandels(end_date, number_of_days)
 
 
@@ -154,7 +155,7 @@ def __printStocksCandles(stocks_list, number_of_days):
 
 
 ##########################################################################################
-#########             THE HORIZONTAL STRATEGY SUPPORT FUNCTIONS                  #########
+#########                          SUPPORT FUNCTIONS                             #########
 ##########################################################################################
 
 def __checkHorizontalStrategy(stocks_list, number_of_days):

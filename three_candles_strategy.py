@@ -16,8 +16,9 @@ from stocks_list import *
 from valid_stocks import *
 
 def threeCandlesStrategy():
-    print("Hello and welcome to the THREE CANDLES STRATEGY")
-    print("-----------------------------------------------\n")
+    print("\n")
+    print("THREE CANDLES STRATEGY")
+    print("----------------------\n")
 
     print("Running the program\n")
     
@@ -50,6 +51,8 @@ def __createStocks():
 
     # Create Stock objects and append them to one list
     for i in range(list_size):
+        if (stocks_names_list[i] == ""):
+            continue
         new_stock = Stock(stocks_names_list[i])
         stocks_list.append(new_stock)
 
@@ -69,6 +72,7 @@ def __createStockCandles(stocks_list, number_of_days):
 
     # Creates the candles for each stock inside the given list
     for stock in stocks_list:
+        # print(stock.getSymbol())
         stock.createCandels(end_date, number_of_days)
 
 
