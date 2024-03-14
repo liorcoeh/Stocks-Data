@@ -13,92 +13,35 @@ This strategy wordk in this way:
 
 from stock import *
 from stocks_list import *
-from valid_stocks import *
 
-def threeCandlesStrategy():
-    print("\n")
-    print("THREE CANDLES STRATEGY")
-    print("----------------------\n")
 
-    print("Running the program\n")
+def threeCandlesStrategy(stocks_list, number_of_days):
+
+    print("Checking the THREE CANDLES strategy\n")
     
-    print("Creating Stocks\n")
-    stocks_list = __createStocks()
-
-    print("Creating Candles (Will take some time)...\n")
-    number_of_days = 3
-    __createStockCandles(stocks_list, number_of_days)
-
-    # __printStocksCandles(stocks_list, number_of_days)
-
-    print("Getting the valid Stocks\n")
     __checkThreeCandlesStrategy(stocks_list, number_of_days)
 
-    print("The program is finished, you can open the three_candles_strategy_valid_stocks.txt file\n\n")
+    print("The program is finished, you can open the valid_stocks_list.txt file\n\n")
 
 
-def __createStocks():
-    """A function that returns a list of objects of type Stock.
-    This list is based on the list of stocks that exist in the txt file
-    """
-
-    # Get the list of stocks names from the txt file
-    stocks_names_list = getTheStocksListFromFile()
-
-    list_size = len(stocks_names_list)
-
-    stocks_list = []
-
-    # Create Stock objects and append them to one list
-    for i in range(list_size):
-        if (stocks_names_list[i] == ""):
-            continue
-        new_stock = Stock(stocks_names_list[i])
-        stocks_list.append(new_stock)
-
-    return (stocks_list)
-
-
-def __createStockCandles(stocks_list, number_of_days):
-    """A function that creates candles, from today backward, in all
-    the stocks that are in the given list.
-    The function will create the right candles in a stock and then move on
-    to the next stock to do the same for that.
-    """
-    end_date = date.today()
-    # FOR PRACTICE
-    # end_date = date.today() - timedelta(days=49)
-    # print(end_date)
-
-    # Creates the candles for each stock inside the given list
-    for stock in stocks_list:
-        # print(stock.getSymbol())
-        stock.createCandels(end_date, number_of_days)
-
-
-def __printStocksCandles(stocks_list, number_of_days):
-
-    for stock in stocks_list:
-        print("\n")
-        print(stock.getSymbol())
-        print("-------------\n")
-        stock.printCandlesList(number_of_days)
-
-
+###########################################################################
+#                         SUPPORTING FUNCTIONS                            #
+###########################################################################
 
 def __checkThreeCandlesStrategy(stocks_list, number_of_days):
     """A function that checks if the candles of a specific stock are valid candles
     under the Three Candles Strategy and if it is a valid one, puts it into the 
     three_candles_strategy_valid_stocks.txt file
     """
-
     valid_stocks_list = []
 
     for stock in stocks_list:
         if (__checkStockCandles(stock, number_of_days) == True):
             valid_stocks_list.append(stock.getSymbol())
 
-    updateThreeCandlesStrategyStocksFile(valid_stocks_list)
+    # update the valid stocks list txt file
+    valid_stocks_list_file_name = "valid_stocks_list.txt"
+    addListToFile(valid_stocks_list_file_name, valid_stocks_list)
 
 
 def __checkStockCandles(stock, number_of_days):
@@ -137,3 +80,4 @@ def __checkStockCandles(stock, number_of_days):
         return (False)
     
     return (True)
+

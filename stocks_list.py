@@ -11,106 +11,118 @@ from utility import *
 #                                                                         #
 ###########################################################################
 
-def getTheStocksListFromFile():
-    """A function that takes the list from the txt file and returns it
-    as a python list of strings"""
 
-    stocks_list_file = open("stocks_list.txt", "r")
-    data = stocks_list_file.read()
-
-    list_of_stocks = data.split("\n")
-
-    stocks_list_file.close()
-
-    return (list_of_stocks)
-
-def upgradeTheStocksListFileBasedOnPrice(min_price=0, max_price=100):
-    """This function will update the stocks_list.txt file to have stocks
-    in it based on prices of the stocks.
+def clearFile(file_name):
+    """A function that removes all the current information that is inside
+    a given txt file.
     """
-    print("UPDATING STOCKS ACCORDING TO PRICE")
-    print("----------------------------------\n")
+    txt_file = open(file_name, "w")
+    txt_file.close()
 
-    current_list_of_stocks = getTheStocksListFromFile()
 
-    updated_list_of_stocks = []
+def getFileData(file_name):
+    """A function that takes the data (a list) from the txt file and returns
+    it as a python list of strings.
+    """
+    txt_file = open(file_name, "r")
 
-    end_date = end_date = date.today()
+    data = txt_file.read()
 
-    # If the end date falls on Sunday or Monday, it will be moved
-    # to Saturday, which is a day this program can run on
-    end_date = updateEndDate(end_date)
-    start_date = end_date - timedelta(days=1)
+    new_list = data.split("\n")
 
-    print("Updating the stocks list - This can take some time...\n")
+    txt_file.close()
 
-    # Takes the close price value of a stock (of the last day) and compares
-    # it to the prices that are given.
-    # If the close price is between these two values, the stock is appended
-    # into the updated list
-    for stock in current_list_of_stocks:
-        if (stock == ""):
-            continue
+    return (new_list)
 
-        try:
-            last_day_candle_data = yfinance.download(stock, start_date, end_date, progress=False)
 
-            close_price = float(last_day_candle_data['Close'])
-            close_price = round(close_price, 2)
-            if (min_price < close_price < max_price):
-                updated_list_of_stocks.append(stock)
-        
-        except:
-            print("Problematic Stock: ", stock)
+def addListToFile(file_name, list_to_add):
+    """A function that add the given list to the given txt file.
+    Any old data in the file will be deleted.
+    """
+    # Get rid of duplicates
+    list_to_add = list(dict.fromkeys(list_to_add))
 
-    __replaceStocksInStocksListFile(updated_list_of_stocks)
+    # Removing stock names that are problematic
+    __removeBadStocksNames(list_to_add)
 
-    print("\nFinished updating the stock list in the file\n\n")
+    # Sort the list
+    list_to_add.sort()
+
+    # Write the sorted list into the txt file
+    txt_file = open(file_name, "w")
+
+    list_size = len(list_to_add)
+
+    for i in range(list_size):
+        txt_file.write(list_to_add[i])
+        txt_file.write("\n")
+
+    txt_file.close()
+
+
+def concatListToFile(file_name, list_to_add):
+    """A function that adds the given list to the given txt file while
+    maintaining the old data in the given file.
+    The exisiting data and the new data will be combined (No duplicates,
+    no unvalid names and it will be sorted).
+    """
+    list_of_stocks = getFileData(file_name)
+
+    # Append the new stocks from the new list into the existing list
+    for stock in list_to_add:
+        list_of_stocks.append(stock)
+
+    addListToFile(file_name, list_of_stocks)
+
+
+def __removeBadStocksNames(list_of_stocks):
+    """This function removes from the list that is given bad stock names:
+    Names that contain a '.'
+    """
+    for stock_name in list_of_stocks:
+        if ('.' in stock_name):
+            list_of_stocks.remove(stock_name)
+
+
 
 ###########################################################################
 #      ADDING DIFFERENT LISTS TO THE stocks_list.txt FILE FUNCTIONS       #
 ###########################################################################
 
-# LEVERAGED LONG STOCKS
-#######################
-def addingLeveragedLongStocksToTheFile():
-    """A function that adds the levereged long stocks into the
-    stocks_list.txt file
+# BASIC STOCKS
+###############
+    
+def addingBasicStocksToTheFile(file_name):
+    """A function that adds some basic stocks into the stocks_list.txt
+    file.
     """
-    print()
-    print("ADDING LEVERAGED LONG STOCKS TO THE TXT FILE")
-    print("--------------------------------------------\n")
+    # print("ADDING BASIC STOCKS")
 
-    new_stocks_list = [
-        "QQQ",
-        "QLD",
-        "TQQQ",
-        "SPY",
-        "SSO",
-        "UPRO",
-        "DIA",
-        "DDM",
-        "UDOW",
-        "IWM",
-        "UWM",
-        "URTY",
-        "SOXX",
-        "SOXL",
+    print()
+    print("ADDING BASIC STOCKS TO THE TXT FILE")
+    print("-----------------------------------\n")
+
+    # NEEDS TO ADD SOME MORE STOCKS TO THIS LIST
+    basic_stocks_list = [
+        "AAPL",
+        "MSFT"
     ]
 
     print("Adding the stocks...\n")
 
-    __addStocksToFile(new_stocks_list)
+    concatListToFile(file_name, basic_stocks_list)
 
     print("Stocks added - You can open the file\n\n")
 
 
 # S&P 500
 ##########
-def addingSandPStocksToTheFile():
+def addingSandPStocksToTheFile(file_name):
     """A function that adds (or updates) the S&P 500 stocks list into the
     stocks_list.txt file
     """
+    # print("ADDING S&P 500 STOCKS")
+
     print()
     print("ADDING S&P500 STOCKS TO THE TXT FILE")
     print("------------------------------------\n")
@@ -119,70 +131,9 @@ def addingSandPStocksToTheFile():
 
     print("Adding the stocks...\n")
 
-    __addStocksToFile(new_stocks_list)
+    concatListToFile(file_name, new_stocks_list)
 
     print("Stocks added - You can open the file\n\n")
-
-# NASDAQ 100
-#############
-# def addingNASDAQOneHundredStocksToTheFile():
-    
-
-
-
-###########################################################################
-#                          SUPPORTING FUNCTIONS                           #
-###########################################################################
-
-def __addStocksToFile(new_stocks_list):
-    """A function that adds new stock names to the file, after it
-    sorted them in assending order (A -> Z)"""
-
-    # Get the stocks already in the file into a list
-    list_of_stocks = getTheStocksListFromFile()
-
-    stocks_list_file = open("stocks_list.txt", "w")
-
-    # Append the new stocks from the new list into the existing list
-    for stock in new_stocks_list:
-        list_of_stocks.append(stock)
-
-    # Get rid of duplicates
-    list_of_stocks = list(dict.fromkeys(list_of_stocks))
-
-    # Sort the appended list
-    list_of_stocks.sort()
-
-    # Write the sorted list into the txt file
-    list_size = len(list_of_stocks)
-
-    for i in range(list_size):
-        stocks_list_file.write(list_of_stocks[i])
-        stocks_list_file.write("\n")
-    
-    stocks_list_file.close()
-
-
-def __replaceStocksInStocksListFile(new_stocks_list):
-    """A function that replaces the list of stocks in the file with a
-    new list of stocks and sorts them in assending order (A -> Z)
-    """
-    stocks_list_file = open("stocks_list.txt", "w")
-
-    # Get rid of duplicates
-    new_stocks_list = list(dict.fromkeys(new_stocks_list))
-
-    # Sort the new list
-    new_stocks_list.sort()
-
-    # Write the sorted list into the txt file
-    list_size = len(new_stocks_list)
-
-    for i in range(list_size):
-        stocks_list_file.write(new_stocks_list[i])
-        stocks_list_file.write("\n")
-    
-    stocks_list_file.close()
 
 
 def __getSandPStockListFromWeb():
@@ -208,20 +159,45 @@ def __getSandPStockListFromWeb():
     return (tickers)
 
 
-def __sortTheTXTFileStocksList():
-    """A function that sorts the list in the txt file in accending
-    order (A -> Z)"""
-
-    list_of_stocks = getTheStocksListFromFile()
-    list_of_stocks.sort()
-
-    list_size = len(list_of_stocks)
-
-    stocks_list_file = open("stocks_list.txt", "w")
-
-    for i in range(list_size):
-        stocks_list_file.write(list_of_stocks[i])
-        stocks_list_file.write("\n")
+# NASDAQ 100
+#############
+def addingNASDAQOneHundredStocksToTheFile(file_name):
+    print("ADDING NASDAQ 100 STOCKS")
     
-    stocks_list_file.close()
 
+# LEVERAGED LONG STOCKS
+#######################
+def addingLeveragedLongStocksToTheFile(file_name):
+    """A function that adds the levereged long stocks into the
+    stocks_list.txt file
+    """
+    # print("ADDING LEVERAGED STOCKS")
+
+    print()
+    print("ADDING LEVERAGED LONG STOCKS TO THE TXT FILE")
+    print("--------------------------------------------\n")
+
+    new_stocks_list = [
+        "QQQ",
+        "QLD",
+        "TQQQ",
+        "SPY",
+        "SSO",
+        "UPRO",
+        "DIA",
+        "BF.B"
+        "DDM",
+        "UDOW",
+        "IWM",
+        "UWM",
+        "URTY",
+        "SOXX",
+        "SOXL",
+    ]
+
+    print("Adding the stocks...\n")
+
+    concatListToFile(file_name, new_stocks_list)
+
+    print("Stocks added - You can open the file\n\n")
+    

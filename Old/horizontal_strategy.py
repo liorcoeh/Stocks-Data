@@ -27,7 +27,9 @@ from valid_stocks import *
 from datetime import datetime
 
 
-def horizontalStrategyFunc():
+def horizontalStrategy():
+    # print("HORIZONTAL STRATEGY")
+    
     print("\n")
     print("HORIZONATL STRATEGY")
     print("-------------------\n")

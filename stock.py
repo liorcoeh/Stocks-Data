@@ -40,7 +40,7 @@ class Stock:
         return (self.__stock_symbol)
 
 
-    def createCandels(self, end_date, number_of_days):
+    def createCandels(self, end_date, number_of_days, min_price, max_price):
         """Creates a list of candles (of the last active days), depends on
         the number of days that are given.
 
@@ -51,6 +51,8 @@ class Stock:
                    this date (it will not include this date) to create the list of
                    the candles.
         number_of_days : int - The number of days / candles to create
+        min_price : float - The minimum price the user wants the candles to have.
+        max_price : float - The maximum price the user wants the candles to have.
         """
         if (isDateValid(end_date) == False):
             print("Stock.py -> createCandles()")
@@ -69,9 +71,16 @@ class Stock:
         start_date = end_date - timedelta(days=1)
 
         new_candles_list = []
+        status = True
         
+        # Creating the candles - If the candles are not in the given range will
+        # stop the creation and will return a false
         for day_num in range(self.__number_of_candles):
             new_candle = self.__createCandle(end_date, start_date, day_num + 1)
+
+            if (self.__validCandle(new_candle, min_price, max_price) == False):
+                status = False
+                break
 
             new_candles_list.append(new_candle)
 
@@ -81,6 +90,8 @@ class Stock:
             start_date = end_date - timedelta(days=1)
 
         self.__candles_list = new_candles_list
+
+        return (status)
     
 
     def getCandlesList(self):
@@ -152,4 +163,18 @@ class Stock:
         return (new_candle)
 
 
-    
+    def __validCandle(self, candle, min_price, max_price):
+        """A function that checks if a candle is a valid one according to
+        the minimum and maximum prices wanted by the user.
+        If the minimum price is higher than the low price of the candle it
+        is not a valid candle.
+        Also, if the maximum price is lower than the high price of the 
+        candle it is not a valid candle.
+        """
+        if (min_price > candle.getLow()):
+            return (False)
+        
+        if (max_price < candle.getHigh()):
+            return (False)
+        
+        return (True)
