@@ -1,5 +1,3 @@
-
-
 """
 This class is the class of the main window - The window that will pop up when activating
 the entire program.
@@ -25,6 +23,7 @@ Add the name of the stock price to the self list - "__stock_prices_names".
 """
 
 from tkinter import *
+import datetime
 
 from strategies_handler import *
 
@@ -53,9 +52,10 @@ class MainWindow:
 
     # VARIABLES FOR THE STOCK LISTS BUTTONS
     __stock_lists_names = [
-        "BASIC STOCKS",
+        "TECHNOLOGIC STOCKS",
         "S&P 500 STOCKS",
         "NASDAQ 100 STOCKS",
+        "RUSSELL 1000 STOCKS",
         "LEVERAGED STOCKS"
     ]
     __stock_lists_buttons = []
@@ -84,10 +84,10 @@ class MainWindow:
         """
         self.__root = root
 
-    
-###########################################################################
-#              THE MAIN FUNCTIONS OF THE MAIN WINDOW CLASS                #
-###########################################################################
+
+##########################################################################################
+#                     THE MAIN FUNCTIONS OF THE MAIN WINDOW CLASS                        #
+##########################################################################################
 
     def setMainWindow(self):
         """This function sets the Main Window:
@@ -125,9 +125,9 @@ class MainWindow:
         self.__createStockPricesButtons()
 
 
-###########################################################################
-#         SETTING THE WINDOW SIZE AND POSISTION SELF FUNCTIONS            #
-###########################################################################
+##########################################################################################
+#                  SETTING THE WINDOW SIZE AND POSISTION SELF FUNCTIONS                  #
+##########################################################################################
 
     # GETTING THE PHYSICAL SCREEN'S SIZE
     def __get_screen_width(self):
@@ -238,10 +238,9 @@ class MainWindow:
             return (min_row_num)
         
 
-
-###########################################################################
-#                 CREATING THE BUTTONS SELF FUNCTIONS                     #
-###########################################################################
+##########################################################################################
+#                          RUN BUTTON AND SUPPORTING FUNCTIONS                           #
+##########################################################################################
         
     def __createRunButton(self):
         """This function creates the button for the run function.
@@ -279,6 +278,44 @@ class MainWindow:
         # Position the RUN button on the main window grid
         new_button.grid(column=column_position, row=row_position)
 
+
+    def __runProgram(self):
+        """This function will run the backend program based on all the information
+        that was received by the user.
+        """
+        print("RUNNING THE PROGRAM - NEEDS TO UPDATE THIS FUNCTION")
+        
+        mainStrategyHandler(self.__strategy_data,
+                            self.__stock_lists_choices, self.__stock_prices_data)
+
+        self.__validStocksWindow()
+
+
+    def __validStocksWindow(self):
+        print("**** FINISHED THE PROGRAM ****")
+
+        stocks_window = Tk()
+        stocks_window.title("The Valid Stocks")
+        stocks_window.geometry("300x600+700+300")
+
+        text_widget = Text(stocks_window, wrap="word", width=40, height=30)
+        text_widget.pack(pady=10)
+
+        content = self.__getStocksFromFile()
+        text_widget.delete(1.0, END) # Clear previous content
+        text_widget.insert(END, content)
+
+    
+    def __getStocksFromFile(self):
+        stocks_list_file = open("valid_stocks_list.txt", "r")
+        data = stocks_list_file.read()
+
+        return (data)
+
+
+##########################################################################################
+#                      STRATEGIES BUTTONS AND SUPPORTING FUNCTIONS                       #
+##########################################################################################
 
     def __createStrategiesButtons(self):
         """This function creates the buttons for the different strategies.
@@ -329,6 +366,141 @@ class MainWindow:
             # Update the self strategies buttons list
             self.__strategies_buttons.append(new_button)
 
+
+    def __strategiesFunc(self, button_name):
+        """This function gets the button name that was clicked and updates all
+        the things that relate to this action.
+        """
+        self.__strategiesChoice(button_name)
+        self.__configureStrategiesButtonsColors(button_name)
+
+
+    def __strategiesChoice(self, button_name):
+        """This function updates the choice of the buttons for the strategies
+        0 -> The first button (THREE CANDLES)
+        1 -> The second button (HORIZONTAL)
+        """
+
+        list_size = len(self.__strategies_buttons)
+
+        for i in range(list_size):
+            if (button_name == self.__strategies_names[i]):
+                self.__strategy_data["strategy_num"] = i
+                self.__strategy_data["strategy_name"] = self.__strategies_names[i]
+
+        if (self.__strategy_data["strategy_name"] == "HORIZONTAL"):
+            self.__getUserHorizontalData()
+
+
+    def __configureStrategiesButtonsColors(self, button_name):
+        """This function changes the color of all the strategies buttons
+        so that only the one that was lastly clicked is different.
+        """
+        list_size = len(self.__strategies_buttons)
+
+        for i in range(list_size):
+            if (button_name == self.__strategies_names[i]):
+                self.__strategies_buttons[i].configure(bg="#65fff2")
+            else:
+                self.__strategies_buttons[i].configure(bg="#05d7ff")
+
+
+###########################################################
+#        HORIZONTAL STRATEGY SUPPORTING FUNCTIONS         #
+###########################################################
+
+    def __getUserHorizontalData(self):
+        """This function opens a window in which the user enters the values
+        he is intrested to work with.
+        In case the user will not enter values they will be set to default
+        values.
+        """
+        horizontal_strategy_window = Toplevel()
+        horizontal_strategy_window.geometry("400x400+300+300")
+
+        for i in range(3):
+            horizontal_strategy_window.columnconfigure(i, weight=1, uniform='a')
+        
+        for i in range(6):
+            horizontal_strategy_window.rowconfigure(i, weight=1, uniform='a')
+
+        self.__number_of_days = StringVar()
+        self.__end_date = StringVar()
+
+        number_of_days_lable = Label(horizontal_strategy_window, text="Number of Days: ")
+        number_of_days_lable.grid(column=0, row=1)
+        number_of_days_entry = Entry(horizontal_strategy_window, textvariable = self.__number_of_days)
+        number_of_days_entry.grid(column=1, row=1)
+
+        end_date_lable = Label(horizontal_strategy_window, text="End Date: ")
+        end_date_lable.grid(column=0, row=3)
+        end_date_entry = Entry(horizontal_strategy_window, textvariable = self.__end_date)
+        end_date_entry.grid(column=1, row=3)
+
+        blue = "#05d7ff"
+        light_blue = "#65e7ff"
+        light_green = "#65fff2"
+        black = "BLACK"
+        background_color = blue
+
+        ok_button = Button(horizontal_strategy_window,
+                        command=lambda root=horizontal_strategy_window:self.__submitHorizontalAction(horizontal_strategy_window),    
+                        text="RUN",
+                        font=("Raleway", 16, "bold"),                           
+                        background=background_color,
+                        foreground=black,
+                        activebackground=light_blue,
+                        activeforeground=black,
+                        highlightthickness=2,
+                        highlightbackground=blue,
+                        highlightcolor="WHITE",
+                        width=20,
+                        height=2,
+                        border=0,
+                        cursor="hand1")
+        
+        ok_button.grid(column=2, row=5)
+
+
+    def __submitHorizontalAction(self, window):
+        """This function gets the info from the window and closes the window.
+        """
+        # Getting the info from the window
+        number_of_days = self.__number_of_days.get()
+        end_date = self.__end_date.get()
+
+        # Making sure that the number of days is valid
+        if (number_of_days == ""):
+            number_of_days = 7
+        else:
+            number_of_days = int(number_of_days)
+
+        if (number_of_days < 3):
+            number_of_days = 3
+
+        if (number_of_days > 10):
+            number_of_days = 10
+
+        # Making sure that the end date is valid
+        if (end_date == ""):
+            end_date = date.today()
+        else:
+            end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Storing the values in the self.__strategy_data to be used later
+        self.__strategy_data["number_of_days"] = number_of_days
+        self.__strategy_data["end_date"] = end_date
+
+        # TO REMOVE
+        # print(self.__stock_prices_data["minimum_price"], self.__stock_prices_data["maximum_price"])
+
+        # Closing the current window
+        window.destroy()
+
+
+##########################################################################################
+#                     STOCK LISTS BUTTONS AND SUPPORTING FUNCTIONS                       #
+##########################################################################################
 
     def __createStockListsButtons(self):
         """This function creates the buttons for the different stock lists.
@@ -387,6 +559,31 @@ class MainWindow:
             self.__stock_lists_choices.append(status)
 
 
+    def __stockListsFunc(self, button_name):
+        """This function updates all the things regarding the stock lists
+        buttons.
+        It updates the self stock lists choices according to the button
+        that was clicked.
+        It changes the color of the button that was clicked.
+        """
+        list_size = len(self.__stock_lists_buttons)
+
+        for i in range(list_size):
+            # If the button that is clicked was not clicked before it will change to clicked
+            if (button_name == self.__stock_lists_names[i] and self.__stock_lists_choices[i] == False):
+                self.__stock_lists_choices[i] = True
+                self.__stock_lists_buttons[i].configure(bg="#65fff2")
+
+            # If the button that is clicked WAS clicked before it will change to UNClicked    
+            elif (button_name == self.__stock_lists_names[i] and self.__stock_lists_choices[i] == True):
+                self.__stock_lists_choices[i] = False
+                self.__stock_lists_buttons[i].configure(bg="#05d7ff")
+
+
+##########################################################################################
+#                     STOCK PRICES BUTTONS AND SUPPORTING FUNCTIONS                      #
+##########################################################################################
+
     def __createStockPricesButtons(self):
         """This function creates the buttons for the stock prices range.
         """
@@ -435,203 +632,6 @@ class MainWindow:
             # Update the self stock prices buttons list
             self.__stock_prices_buttons.append(new_button)
 
-
-###########################################################################
-#                      THE RUN SUPPORT FUNCTIONS                          #
-###########################################################################
-        
-    def __runProgram(self):
-        """This function will run the backend program based on all the information
-        that was received by the user.
-        """
-        print("RUNNING THE PROGRAM - NEEDS TO UPDATE THIS FUNCTION")
-        
-        mainStrategyHandler(self.__strategy_data,
-                            self.__stock_lists_choices, self.__stock_prices_data)
-
-        self.__validStocksWindow()
-
-
-    def __validStocksWindow(self):
-        print("**** FINISHED THE PROGRAM ****")
-
-        stocks_window = Tk()
-        stocks_window.title("The Valid Stocks")
-        stocks_window.geometry("300x600+700+300")
-
-        text_widget = Text(stocks_window, wrap="word", width=40, height=30)
-        text_widget.pack(pady=10)
-
-        content = self.__getStocksFromFile()
-        text_widget.delete(1.0, END) # Clear previous content
-        text_widget.insert(END, content)
-
-    
-    def __getStocksFromFile(self):
-        stocks_list_file = open("valid_stocks_list.txt", "r")
-        data = stocks_list_file.read()
-
-        return (data)
-
-
-###########################################################################
-#                  THE STRATEGIES SUPPORT FUNCTIONS                       #
-###########################################################################
-
-    def __strategiesFunc(self, button_name):
-        """This function gets the button name that was clicked and updates all
-        the things that relate to this action.
-        """
-        self.__strategiesChoice(button_name)
-        self.__configureStrategiesButtonsColors(button_name)
-
-
-    def __strategiesChoice(self, button_name):
-        """This function updates the choice of the buttons for the strategies
-        0 -> The first button (THREE CANDLES)
-        1 -> The second button (HORIZONTAL)
-        """
-
-        list_size = len(self.__strategies_buttons)
-
-        for i in range(list_size):
-            if (button_name == self.__strategies_names[i]):
-                self.__strategy_data["strategy_num"] = i
-                self.__strategy_data["strategy_name"] = self.__strategies_names[i]
-
-        if (self.__strategy_data["strategy_name"] == "HORIZONTAL"):
-            self.__getUserHorizontalData()
-
-
-    def __configureStrategiesButtonsColors(self, button_name):
-        """This function changes the color of all the strategies buttons
-        so that only the one that was lastly clicked is different.
-        """
-        list_size = len(self.__strategies_buttons)
-
-        for i in range(list_size):
-            if (button_name == self.__strategies_names[i]):
-                self.__strategies_buttons[i].configure(bg="#65fff2")
-            else:
-                self.__strategies_buttons[i].configure(bg="#05d7ff")
-
-
-    def __getUserHorizontalData(self):
-        """This function opens a window in which the user enters the values
-        he is intrested to work with.
-        In case the user will not enter values they will be set to default
-        values.
-        """
-        horizontal_strategy_window = Toplevel()
-        horizontal_strategy_window.geometry("400x400+300+300")
-
-        for i in range(3):
-            horizontal_strategy_window.columnconfigure(i, weight=1, uniform='a')
-        
-        for i in range(6):
-            horizontal_strategy_window.rowconfigure(i, weight=1, uniform='a')
-
-        self.__number_of_days = StringVar()
-        self.__end_date = StringVar()
-
-        number_of_days_lable = Label(horizontal_strategy_window, text="Number of Days: ")
-        number_of_days_lable.grid(column=0, row=1)
-        number_of_days_entry = Entry(horizontal_strategy_window, textvariable = self.__number_of_days)
-        number_of_days_entry.grid(column=1, row=1)
-
-        end_date_lable = Label(horizontal_strategy_window, text="End Date: ")
-        end_date_lable.grid(column=0, row=3)
-        end_date_entry = Entry(horizontal_strategy_window, textvariable = self.__end_date)
-        end_date_entry.grid(column=1, row=3)
-
-        blue = "#05d7ff"
-        light_blue = "#65e7ff"
-        light_green = "#65fff2"
-        black = "BLACK"
-        background_color = blue
-
-        ok_button = Button(horizontal_strategy_window,
-                        command=lambda root=horizontal_strategy_window:self.__submitHorizontalAction(horizontal_strategy_window),    
-                        text="RUN",
-                        font=("Raleway", 16, "bold"),                           
-                        background=background_color,
-                        foreground=black,
-                        activebackground=light_blue,
-                        activeforeground=black,
-                        highlightthickness=2,
-                        highlightbackground=blue,
-                        highlightcolor="WHITE",
-                        width=20,
-                        height=2,
-                        border=0,
-                        cursor="hand1")
-        
-        ok_button.grid(column=2, row=5)
-
-    def __submitHorizontalAction(self, window):
-        """This function gets the info from the window and closes the window.
-        """
-        # Getting the info from the window
-        number_of_days = self.__number_of_days.get()
-        end_date = self.__end_date.get()
-
-        # Making sure that the number of days is valid
-        if (number_of_days == ""):
-            number_of_days = 7
-        else:
-            number_of_days = int(number_of_days)
-
-        if (number_of_days < 3):
-            number_of_days = 3
-
-        if (number_of_days > 10):
-            number_of_days = 10
-
-        # Making sure that the end date is valid
-        if (end_date == ""):
-            end_date = date.today()
-        else:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
-
-        # Storing the values in the self.__strategy_data to be used later
-        self.__strategy_data["number_of_days"] = number_of_days
-        self.__strategy_data["end_date"] = end_date
-
-        # TO REMOVE
-        # print(self.__stock_prices_data["minimum_price"], self.__stock_prices_data["maximum_price"])
-
-        # Closing the current window
-        window.destroy()
-
-
-###########################################################################
-#                   THE STOCK LISTS SUPPORT FUNCTIONS                     #
-###########################################################################
-
-    def __stockListsFunc(self, button_name):
-        """This function updates all the things regarding the stock lists
-        buttons.
-        It updates the self stock lists choices according to the button
-        that was clicked.
-        It changes the color of the button that was clicked.
-        """
-        list_size = len(self.__stock_lists_buttons)
-
-        for i in range(list_size):
-            # If the button that is clicked was not clicked before it will change to clicked
-            if (button_name == self.__stock_lists_names[i] and self.__stock_lists_choices[i] == False):
-                self.__stock_lists_choices[i] = True
-                self.__stock_lists_buttons[i].configure(bg="#65fff2")
-
-            # If the button that is clicked WAS clicked before it will change to UNClicked    
-            elif (button_name == self.__stock_lists_names[i] and self.__stock_lists_choices[i] == True):
-                self.__stock_lists_choices[i] = False
-                self.__stock_lists_buttons[i].configure(bg="#05d7ff")
-
-
-###########################################################################
-#                 THE STOCK PRICES SUPPORT FUNCTIONS                      #
-###########################################################################
 
     def __stockPricesFunc(self, button_name):
         """This function gets the button name that was clicked and updates all

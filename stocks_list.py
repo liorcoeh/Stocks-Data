@@ -1,16 +1,16 @@
-import yfinance
-import bs4 as bs
-import requests
-from datetime import date, timedelta
+import pandas as pd
 
-from utility import *
+"""
+This file handles with txt files - Inserting new data, replacing data and so on
+"""
 
-###########################################################################
-#                                                                         #
-#       FUNCTIONS THAT HANDLE THE TXT FILE OF THE BASE STOCKS LIST        #
-#                                                                         #
-###########################################################################
-
+##########################################################################################
+##########################################################################################
+#########                                                                        #########
+#########                 FUNCTIONS THAT DEAL WITH TXT FILES                     #########
+#########                                                                        #########
+##########################################################################################
+##########################################################################################
 
 def clearFile(file_name):
     """A function that removes all the current information that is inside
@@ -53,9 +53,12 @@ def addListToFile(file_name, list_to_add):
 
     list_size = len(list_to_add)
 
-    for i in range(list_size):
-        txt_file.write(list_to_add[i])
+    for i in range(list_size - 1):
+        txt_file.write(list_to_add[i + 1])
         txt_file.write("\n")
+
+    # txt_file.write(list_to_add[i])
+    # txt_file.write("\n")
 
     txt_file.close()
 
@@ -85,41 +88,54 @@ def __removeBadStocksNames(list_of_stocks):
 
 
 
-###########################################################################
-#      ADDING DIFFERENT LISTS TO THE stocks_list.txt FILE FUNCTIONS       #
-###########################################################################
+##########################################################################################
+##########################################################################################
+#########                                                                        #########
+#########         ADDING DIFFERENT LISTS TO THE THE GIVEN FILE FUNCTIONS         #########
+#########                                                                        #########
+##########################################################################################
+##########################################################################################
 
-# BASIC STOCKS
-###############
+            
+##########################################################################################
+#                             TECHNOLOGIC GIANTS STOCKS                                  #
+##########################################################################################
     
-def addingBasicStocksToTheFile(file_name):
+def addingTehcnologicGiantsStocksToTheFile(file_name):
     """A function that adds some basic stocks into the stocks_list.txt
     file.
     """
     # print("ADDING BASIC STOCKS")
 
     print()
-    print("ADDING BASIC STOCKS TO THE TXT FILE")
-    print("-----------------------------------\n")
+    print("ADDING TECHNOLOGIC GIANTS STOCKS TO THE TXT FILE")
+    print("------------------------------------------------\n")
 
     # NEEDS TO ADD SOME MORE STOCKS TO THIS LIST
-    basic_stocks_list = [
+    technologic_giants_stocks_list = [
+        "MSFT",
         "AAPL",
-        "MSFT"
+        "GOOG",
+        "AMZN",
+        "TSLA",
+        "META",
+        "NVDA",      
     ]
 
-    print("Adding the stocks...\n")
+    print("Adding the TECHNOLOGIC GIANTS stocks...\n")
 
-    concatListToFile(file_name, basic_stocks_list)
+    concatListToFile(file_name, technologic_giants_stocks_list)
 
-    print("Stocks added - You can open the file\n\n")
+    print("Stocks added\n")
 
 
-# S&P 500
-##########
+##########################################################################################
+#                                   S&P 500 STOCKS                                       #
+##########################################################################################
+
 def addingSandPStocksToTheFile(file_name):
-    """A function that adds (or updates) the S&P 500 stocks list into the
-    stocks_list.txt file
+    """A function that adds the S&P 500 stocks list into the
+    given txt file.
     """
     # print("ADDING S&P 500 STOCKS")
 
@@ -129,44 +145,114 @@ def addingSandPStocksToTheFile(file_name):
 
     new_stocks_list = __getSandPStockListFromWeb()
 
-    print("Adding the stocks...\n")
+    print("Adding the S&P 500 stocks...\n")
 
     concatListToFile(file_name, new_stocks_list)
 
-    print("Stocks added - You can open the file\n\n")
+    print("Stocks added\n")
 
 
 def __getSandPStockListFromWeb():
-    """This function gets the list of stocks in the S&P 500 , from the wikipedia
-    web page and returns it as a list of tickers/symbols
-    
+    """This function gets the list of stocks in the Nasdaq 100.
+    It needs several important arguments to acheive this:
+    1) html = http://en.wikipedia.org/wiki/List_of_S%26P_500_companies
+       The url of the right wikipedia page.
+    2) The table number out of all the tables on the wikipedia page
+       The table number is 1.
+    4) The header on the valid table to get the symbols from.
+       The heaser is "Symbol"
     """
+    table_num = 0
+    
+    s_and_p_500 = pd.read_html("http://en.wikipedia.org/wiki/List_of_S%26P_500_companies")[table_num]
+    s_and_p_500_symbols = s_and_p_500.Symbol.tolist()
 
-    # Getting the list from wikipedia and putting into a table
-    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
-    soup = bs.BeautifulSoup(resp.text, 'lxml')
-    table = soup.find('table', {'class': 'wikitable sortable'})
-
-    # Putting the info from the table into a list (Each ticker comes with \n at the
-    # end, like - 'AAPL\n', so it needs to be removed)
-    tickers = []
-
-    for row in table.findAll('tr')[1:]:
-        ticker = row.findAll('td')[0].text
-        ticker = ticker[:len(ticker)-1] # This line removes the \n at the end
-        tickers.append(ticker)
-
-    return (tickers)
+    return (s_and_p_500_symbols)
 
 
-# NASDAQ 100
-#############
+##########################################################################################
+#                                 NASDAQ 100 STOCKS                                      #
+##########################################################################################
+
 def addingNASDAQOneHundredStocksToTheFile(file_name):
+    """A function that adds the Nasdaq 100 stocks list into the
+    given txt file.
+    """
+    print()
     print("ADDING NASDAQ 100 STOCKS")
+    print("------------------------\n")
+
+    new_stocks_list = __getNasdaqOneHundredListFromWeb()
+
+    print("Adding the NASDAQ 100 stocks...\n")
+
+    concatListToFile(file_name, new_stocks_list)
+
+    print("Stocks added\n")
     
 
-# LEVERAGED LONG STOCKS
-#######################
+def __getNasdaqOneHundredListFromWeb():
+    """This function gets the list of stocks in the Nasdaq 100.
+    It needs several important arguments to acheive this:
+    1) html = https://en.wikipedia.org/wiki/Nasdaq-100
+       The url of the right wikipedia page.
+    2) The table number out of all the tables on the wikipedia page
+       The table number is 4.
+    4) The header on the valid table to get the symbols from.
+       The header is "Ticker"
+    """
+    table_num = 4
+    
+    nasdaq_100 = pd.read_html("https://en.wikipedia.org/wiki/Nasdaq-100")[table_num]
+    nasdaq_100_symbols = nasdaq_100.Ticker.tolist()
+
+    return (nasdaq_100_symbols)
+
+
+##########################################################################################
+#                                RUSSELL 1000 STOCKS                                     #
+##########################################################################################
+
+def addingRussellOneThousandStocksToTheFile(file_name):
+    """A function that adds the Russell 1000 stocks list into the
+    given txt file.
+    """
+    print()
+    print("ADDING RUSSELL 1000 STOCKS")
+    print("--------------------------\n")
+
+    new_stocks_list = __getRussellOneThousandListFromWeb()
+
+    print("Adding the RUSSELL 1000 stocks...\n")
+
+    concatListToFile(file_name, new_stocks_list)
+
+    print("Stocks added\n")
+    
+
+def __getRussellOneThousandListFromWeb():
+    """This function gets the list of stocks in the Russell 1000.
+    It needs several important arguments to acheive this:
+    1) html = https://en.wikipedia.org/wiki/Russell_1000_Index
+       The url of the right wikipedia page.
+    2) The table number out of all the tables on the wikipedia page
+       The table number is 2.
+    4) The header on the valid table to get the symbols from.
+       The header is "Ticker"
+    """
+    table_num = 2
+    
+    nasdaq_100 = pd.read_html("https://en.wikipedia.org/wiki/Russell_1000_Index")[table_num]
+    nasdaq_100_symbols = nasdaq_100.Ticker.tolist()
+
+    return (nasdaq_100_symbols)
+
+
+
+##########################################################################################
+#                               LEVERAGED LONG STOCKS                                    #
+##########################################################################################
+
 def addingLeveragedLongStocksToTheFile(file_name):
     """A function that adds the levereged long stocks into the
     stocks_list.txt file
@@ -195,9 +281,9 @@ def addingLeveragedLongStocksToTheFile(file_name):
         "SOXL",
     ]
 
-    print("Adding the stocks...\n")
+    print("Adding the LEVERAGED stocks...\n")
 
     concatListToFile(file_name, new_stocks_list)
 
-    print("Stocks added - You can open the file\n\n")
+    print("Stocks added\n")
     

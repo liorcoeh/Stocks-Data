@@ -14,3 +14,6 @@ main_window.createButtons()
 
 root.mainloop()
 
+# file_name = "stocks_list.txt"
+# clearFile(file_name)
+# addingTehcnologicGiantsStocksToTheFile(file_name)

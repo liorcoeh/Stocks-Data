@@ -1,11 +1,8 @@
 from tkinter import *
 
-# from three_candles_strategy import *
-# from horizontal_strategy import *
-from strategies import *
-
 from stock import *
 from stocks_list import *
+from strategies import *
 
 
 def mainStrategyHandler(strategy_data, stock_list_choices, stock_prices_data):
@@ -28,9 +25,10 @@ def __stockListsHandler(stock_list_choices):
     clearFile(file_name)
 
     list_of_functions = [
-        addingBasicStocksToTheFile,
+        addingTehcnologicGiantsStocksToTheFile,
         addingSandPStocksToTheFile,
         addingNASDAQOneHundredStocksToTheFile,
+        addingRussellOneThousandStocksToTheFile,
         addingLeveragedLongStocksToTheFile
     ]
 
